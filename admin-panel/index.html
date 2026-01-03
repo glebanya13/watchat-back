@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WatChat Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Colors from Flutter app */
+            --bg-primary: rgb(19, 28, 33);
+            --bg-secondary: rgb(31, 44, 52);
+            --bg-tertiary: rgb(37, 45, 49);
+            --accent-primary: rgb(0, 167, 131);
+            --accent-hover: rgb(5, 96, 98);
+            --text-primary: rgb(241, 241, 242);
+            --text-secondary: rgb(200, 200, 200);
+            --text-muted: rgb(150, 150, 150);
+            --border-color: rgb(37, 45, 50);
+            --success: rgb(0, 167, 131);
+            --danger: rgb(239, 68, 68);
+            --card-bg: rgb(31, 44, 52);
+            --hover-bg: rgb(37, 45, 49);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--accent-primary);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 12px;
+        }
+
+        .btn-logout {
+            padding: 6px 14px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-logout:hover {
+            background: #dc2626;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 56px;
+            width: 240px;
+            height: calc(100vh - 56px);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 16px 0;
+            overflow-y: auto;
+            z-index: 999;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+        }
+
+        .sidebar-item:hover {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+        }
+
+        .sidebar-item.active {
+            background: var(--bg-tertiary);
+            color: var(--accent-primary);
+            border-left-color: var(--accent-primary);
+            font-weight: 500;
+        }
+
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 56px;
+            padding: 24px;
+            min-height: calc(100vh - 56px);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+
+        /* Compact Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--accent-primary);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: rgba(0, 167, 131, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
+            font-size: 18px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .stat-change {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-tertiary);
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        tbody tr {
+            transition: all 0.2s;
+        }
+
+        tbody tr:hover {
+            background: var(--hover-bg);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: rgba(0, 167, 131, 0.2);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--accent-hover);
+        }
+
+        /* Login Form */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            padding: 24px;
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .login-logo {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent-primary);
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(0, 167, 131, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 10px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-login:hover {
+            background: var(--accent-hover);
+        }
+
+        .alert {
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            border-left: 3px solid;
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+
+        .error {
+            color: var(--danger);
+            margin-top: 6px;
+            font-size: 12px;
+        }
+
+        /* Countries Grid */
+        .countries-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .country-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .country-card:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .country-flag {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .country-name {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .country-count {
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-form">
+            <div class="login-header">
+                <div class="login-logo">WatChat Админ</div>
+                <div class="login-subtitle">Панель администратора</div>
+            </div>
+
+            <div id="noAdminMessage" class="alert alert-warning" style="display: none;">
+                <strong>⚠️ Администратор не найден!</strong><br>
+                <small>Создайте первого администратора ниже:</small>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="phoneInput">Номер телефона</label>
+                <input type="text" id="phoneInput" class="form-input" placeholder="+1234567890" />
+            </div>
+
+            <div class="form-group" id="nameInputGroup" style="display: none;">
+                <label class="form-label" for="nameInput">Ваше имя</label>
+                <input type="text" id="nameInput" class="form-input" placeholder="Имя администратора" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="codeInput">Код верификации</label>
+                <input type="password" id="codeInput" class="form-input" placeholder="111111" />
+            </div>
+
+            <button class="btn-login" onclick="login()">Войти</button>
+            <button id="createAdminBtn" class="btn btn-success" onclick="createFirstAdmin()" style="display: none; width: 100%; margin-top: 12px;">Создать первого администратора</button>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" style="display: none;">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <span class="material-icons" style="font-size: 18px;">chat</span>
+                    </div>
+                    <span>WatChat Админ</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">A</div>
+                    <div>
+                        <div style="font-weight: 500; font-size: 12px;" id="currentAdminName">Админ</div>
+                        <div style="font-size: 10px; color: var(--text-muted);" id="currentAdminPhone">+1234567890</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">Выйти</button>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-item active" onclick="showTab('users')">
+                <div class="sidebar-icon">
+                    <span class="material-icons">people</span>
+                </div>
+                <span>Пользователи</span>
+            </div>
+            <div class="sidebar-item" onclick="showTab('admins')">
+                <div class="sidebar-icon">
+                    <span class="material-icons">admin_panel_settings</span>
+                </div>
+                <span>Администраторы</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Users Tab -->
+            <div id="usersTab" class="content" style="display: none;">
+                <h1 class="page-title">Управление пользователями</h1>
+                <p class="page-subtitle">Управление и мониторинг аккаунтов пользователей</p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Имя</th>
+                                <th>Телефон</th>
+                                <th>Статус</th>
+                                <th>Создан</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted);">Загрузка...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Administrators Tab -->
+            <div id="adminsTab" class="content" style="display: none;">
+                <h1 class="page-title">Администраторы</h1>
+                <p class="page-subtitle">Список всех администраторов системы</p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Имя</th>
+                                <th>Телефон</th>
+                                <th>Создан</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminsTableBody">
+                            <tr>
+                                <td colspan="3" style="text-align: center; padding: 32px; color: var(--text-muted);">Загрузка...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://62.217.178.166:3000';
+        let token = localStorage.getItem('admin_token');
+
+        // Check if admin exists on page load
+        checkAdminExists();
+
+        if (token) {
+            showAdminPanel();
+            loadCurrentUser();
+            loadUsers();
+            loadAdmins();
+        }
+
+               async function checkAdminExists() {
+                   try {
+                       const res = await fetch(`${API_BASE}/admin/check-admin`);
+                       if (!res.ok) {
+                           console.error('Error checking admin:', res.status, res.statusText);
+                           return;
+                       }
+                       const text = await res.text();
+                       if (!text) {
+                           console.error('Empty response from server');
+                           return;
+                       }
+                       const data = JSON.parse(text);
+                
+                if (!data.adminExists) {
+                    document.getElementById('noAdminMessage').style.display = 'block';
+                    document.getElementById('nameInputGroup').style.display = 'block';
+                    document.getElementById('createAdminBtn').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error checking admin:', error);
+            }
+        }
+
+               async function createFirstAdmin() {
+                   const phone = document.getElementById('phoneInput').value;
+                   const name = document.getElementById('nameInput').value;
+                   const errorDiv = document.getElementById('loginError');
+
+                   if (!phone || !name) {
+                       errorDiv.textContent = 'Пожалуйста, введите номер телефона и имя';
+                       return;
+                   }
+
+                   try {
+                       const sendCodeRes = await fetch(`${API_BASE}/auth/send-code`, {
+                           method: 'POST',
+                           headers: { 'Content-Type': 'application/json' },
+                           body: JSON.stringify({ phoneNumber: phone }),
+                       });
+
+                       if (!sendCodeRes.ok) {
+                           const errorText = await sendCodeRes.text();
+                           errorDiv.textContent = `Ошибка отправки кода: ${sendCodeRes.status} - ${errorText}`;
+                           return;
+                       }
+
+                       const verifyRes = await fetch(`${API_BASE}/auth/verify-code`, {
+                           method: 'POST',
+                           headers: { 'Content-Type': 'application/json' },
+                           body: JSON.stringify({ phoneNumber: phone, code: '111111' }),
+                       });
+
+                       if (!verifyRes.ok) {
+                           const errorText = await verifyRes.text();
+                           errorDiv.textContent = `Ошибка верификации: ${verifyRes.status} - ${errorText}`;
+                           return;
+                       }
+
+                       const text = await verifyRes.text();
+                       if (!text) {
+                           errorDiv.textContent = 'Пустой ответ от сервера';
+                           return;
+                       }
+
+                       let verifyData;
+                       try {
+                           verifyData = JSON.parse(text);
+                       } catch (e) {
+                           errorDiv.textContent = `Ошибка парсинга ответа: ${text}`;
+                           return;
+                       }
+                if (!verifyData.token) {
+                    errorDiv.textContent = 'Неверный код верификации';
+                    return;
+                }
+
+                try {
+                    await fetch(`${API_BASE}/users`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${verifyData.token}`,
+                        },
+                        body: JSON.stringify({
+                            name: name,
+                            profilePic: '',
+                        }),
+                    });
+                } catch (e) {}
+
+                const createAdminRes = await fetch(`${API_BASE}/admin/create-first-admin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phoneNumber: phone,
+                        name: name,
+                    }),
+                });
+
+                if (!createAdminRes.ok) {
+                    const errorData = await createAdminRes.json();
+                    errorDiv.textContent = errorData.message || 'Не удалось создать администратора';
+                    return;
+                }
+
+                token = verifyData.token;
+                localStorage.setItem('admin_token', token);
+                
+                document.getElementById('noAdminMessage').style.display = 'none';
+                document.getElementById('nameInputGroup').style.display = 'none';
+                document.getElementById('createAdminBtn').style.display = 'none';
+
+                showAdminPanel();
+                loadCurrentUser();
+                loadUsers();
+                loadAdmins();
+            } catch (error) {
+                errorDiv.textContent = 'Ошибка: ' + error.message;
+            }
+        }
+
+               async function login() {
+                   const phone = document.getElementById('phoneInput').value;
+                   const code = document.getElementById('codeInput').value;
+                   const errorDiv = document.getElementById('loginError');
+
+                   if (!phone || !code) {
+                       errorDiv.textContent = 'Пожалуйста, введите номер телефона и код';
+                       return;
+                   }
+
+                   try {
+                       const sendCodeRes = await fetch(`${API_BASE}/auth/send-code`, {
+                           method: 'POST',
+                           headers: { 'Content-Type': 'application/json' },
+                           body: JSON.stringify({ phoneNumber: phone }),
+                       });
+
+                       if (!sendCodeRes.ok) {
+                           const errorText = await sendCodeRes.text();
+                           errorDiv.textContent = `Ошибка отправки кода: ${sendCodeRes.status} - ${errorText}`;
+                           return;
+                       }
+
+                       const verifyRes = await fetch(`${API_BASE}/auth/verify-code`, {
+                           method: 'POST',
+                           headers: { 'Content-Type': 'application/json' },
+                           body: JSON.stringify({ phoneNumber: phone, code }),
+                       });
+
+                       if (!verifyRes.ok) {
+                           const errorText = await verifyRes.text();
+                           errorDiv.textContent = `Ошибка верификации: ${verifyRes.status} - ${errorText}`;
+                           return;
+                       }
+
+                       const text = await verifyRes.text();
+                       if (!text) {
+                           errorDiv.textContent = 'Пустой ответ от сервера';
+                           return;
+                       }
+
+                       let verifyData;
+                       try {
+                           verifyData = JSON.parse(text);
+                       } catch (e) {
+                           errorDiv.textContent = `Ошибка парсинга ответа: ${text}`;
+                           return;
+                       }
+                if (verifyData.token) {
+                    token = verifyData.token;
+                    localStorage.setItem('admin_token', token);
+                    
+                    const userRes = await fetch(`${API_BASE}/users/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` },
+                    });
+                    
+                    if (!userRes.ok) {
+                        errorDiv.textContent = 'Не удалось получить данные пользователя';
+                        return;
+                    }
+                    
+                    const userData = await userRes.json();
+                    
+                    if (!userData.isAdmin) {
+                        errorDiv.textContent = 'Доступ запрещен. Только администраторы могут использовать эту панель.';
+                        token = null;
+                        localStorage.removeItem('admin_token');
+                        return;
+                    }
+
+                    showAdminPanel();
+                    loadCurrentUser();
+                    loadUsers();
+                    loadAdmins();
+                       } else {
+                           errorDiv.textContent = 'Неверный код';
+                       }
+                   } catch (error) {
+                       console.error('Login error:', error);
+                       if (error instanceof SyntaxError) {
+                           errorDiv.textContent = 'Ошибка: Сервер вернул невалидный JSON. Проверьте логи сервера.';
+                       } else {
+                           errorDiv.textContent = 'Ошибка входа: ' + error.message;
+                       }
+                   }
+               }
+
+        function logout() {
+            token = null;
+            localStorage.removeItem('admin_token');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(content => content.style.display = 'none');
+            
+            event.target.closest('.sidebar-item').classList.add('active');
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+        }
+
+        async function loadCurrentUser() {
+            try {
+                const res = await fetch(`${API_BASE}/users/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                
+                if (res.ok) {
+                    const user = await res.json();
+                    document.getElementById('currentAdminName').textContent = user.name || 'Admin';
+                    document.getElementById('currentAdminPhone').textContent = user.phoneNumber || '';
+                    document.getElementById('userAvatar').textContent = (user.name || 'A').charAt(0).toUpperCase();
+                }
+            } catch (error) {
+                console.error('Error loading current user:', error);
+            }
+        }
+
+        async function loadUsers() {
+            try {
+                const res = await fetch(`${API_BASE}/admin/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                
+                if (!res.ok) {
+                    if (res.status === 403) {
+                        alert('Доступ запрещен. Пожалуйста, войдите снова.');
+                        logout();
+                        return;
+                    }
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                
+                const users = await res.json();
+                
+                if (!Array.isArray(users)) {
+                    throw new Error('Invalid response format');
+                }
+
+                const tbody = document.getElementById('usersTableBody');
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted);">Пользователи не найдены</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map(user => `
+                    <tr>
+                        <td style="font-weight: 500;">${user.name || 'Н/Д'}</td>
+                        <td>${user.phoneNumber || 'Н/Д'}</td>
+                        <td>
+                            <span class="badge ${user.isBlocked ? 'badge-danger' : 'badge-success'}">
+                                ${user.isBlocked ? 'Заблокирован' : 'Активен'}
+                            </span>
+                        </td>
+                        <td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString('ru-RU') : 'Н/Д'}</td>
+                        <td>
+                            <button class="btn ${user.isBlocked ? 'btn-success' : 'btn-danger'}" 
+                                    onclick="toggleBlock('${user.uid}')" 
+                                    style="padding: 4px 10px; font-size: 11px;">
+                                ${user.isBlocked ? 'Разблокировать' : 'Заблокировать'}
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('usersTableBody').innerHTML = 
+                    '<tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--danger);">Ошибка загрузки пользователей: ' + error.message + '</td></tr>';
+            }
+        }
+
+        async function loadAdmins() {
+            try {
+                const res = await fetch(`${API_BASE}/admin/admins`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                
+                if (!res.ok) {
+                    if (res.status === 403) {
+                        alert('Доступ запрещен. Пожалуйста, войдите снова.');
+                        logout();
+                        return;
+                    }
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                
+                const admins = await res.json();
+                
+                if (!Array.isArray(admins)) {
+                    throw new Error('Invalid response format');
+                }
+
+                const tbody = document.getElementById('adminsTableBody');
+                if (admins.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 32px; color: var(--text-muted);">Администраторы не найдены</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = admins.map(admin => `
+                    <tr>
+                        <td style="font-weight: 500;">${admin.name || 'Н/Д'}</td>
+                        <td>${admin.phoneNumber || 'Н/Д'}</td>
+                        <td>${admin.createdAt ? new Date(admin.createdAt).toLocaleDateString('ru-RU') : 'Н/Д'}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading admins:', error);
+                document.getElementById('adminsTableBody').innerHTML = 
+                    '<tr><td colspan="3" style="text-align: center; padding: 32px; color: var(--danger);">Ошибка загрузки администраторов: ' + error.message + '</td></tr>';
+            }
+        }
+
+        async function toggleBlock(uid) {
+            try {
+                const res = await fetch(`${API_BASE}/admin/users/${uid}/block`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                if (res.ok) {
+                    loadUsers();
+                }
+            } catch (error) {
+                console.error('Error toggling block:', error);
+                alert('Ошибка: ' + error.message);
+            }
+        }
+
+        // Auto-refresh users every 30 seconds
+        if (token) {
+            setInterval(loadUsers, 30000);
+        }
+    </script>
+</body>
+</html>
